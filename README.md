@@ -28,3 +28,9 @@ things at a distance are most often (except during anomalies of atmospheric
 refraction) partially or fully hidden from view by that curve.
 
 John Comeau, 2017-07-24
+
+A problem with the dizzib and earthcurvature sites is that they don't allow
+specification of a refractive index, which adjusts the "drop" by accounting
+for the bending of light rays in the denser air typically found at earth's
+surface. A typical value is .25. You can `pydoc earthcurvature` to see how
+to use this in your calculations.
