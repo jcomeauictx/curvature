@@ -12,7 +12,13 @@ variable COEFFICIENT_OF_REFRACTION, typically to about .25:
     drop in 10.00000000 miles is 50.01261449 feet
 
 often you will see the coefficient expressed as 4/3. this is because they
-have already inverted it using 1/(1-k).
+have already inverted it using 1/(1-k). by another formula, which only
+measures the effect on curvature from one end, it is expressed as 7/6,
+which means a COEFFICIENT_OF_REFRACTION=.125
+
+see https://www.metabunk.org
+ /standard-atmospheric-refraction-empirical-evidence-and-derivation.t8703/
+and https://en.wikipedia.org/wiki/Atmospheric_refraction
 '''
 from __future__ import print_function, division
 import sys, os, math, logging
