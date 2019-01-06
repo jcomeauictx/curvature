@@ -46,3 +46,7 @@ they are projected as if the viewer has a narrow vertical slit with which to
 see, and so he is turning in place to see the panorama. And one more severe
 limitation of the current state of the software is that it assumes a view over
 the ocean, and will not show anything below "eye height".
+
+But despite all those shortcomings, it can be useful in comparison with
+Ulrich's panoramas at the link mentioned above, and seeing which more
+accurately reflects the skyline you see at your current location.
