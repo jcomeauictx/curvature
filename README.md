@@ -50,3 +50,21 @@ the ocean, and will not show anything below "eye height".
 But despite all those shortcomings, it can be useful in comparison with
 Ulrich's panoramas at the link mentioned above, and seeing which more
 accurately reflects the skyline you see at your current location.
+
+#Getting Started
+
+This assumes a typical Debian developer's system. Your mileage may vary.
+
+```
+sudo mkdir -p /usr/local/share/gis/hgt
+sudo chown $USER.$USER /usr/local/share/gis/hgt /usr/src
+mkdir -p /usr/src/jcomeauictx
+cd /usr/src/jcomeauictx
+git clone https://github.com/jcomeauictx/curvature.git
+cd curvature/
+sudo apt-get install zip imagemagick
+make N37W120.fetch
+make showfile  # shows part of Northern California west of Millerton Lake
+make N24W111.fetch N24W112.fetch N25W111.fetch N25W112.fetch N26W111.fetch N26W112.fetch
+make panorama  # shows horizon in La Paz, Mexico looking towards Isla San Jose
+```

@@ -100,7 +100,8 @@ def panorama(bearing, latitude, longitude, distance=500, height=1.8, span=60):
         logging.debug('pointlist: %s', pointlist)
         previous = height  # determine when to draw line at top of ridge
         for depth in reversed(range(len(pointlist))):
-            gray = min(10, 255 - depth)  # farthest away is whitest
+            # farthest away will be shown lightest
+            gray = int(max(10, min(255, 255 - depth / 50)))
             point = pointlist[depth]
             # remember that (0, 0) is top left of PIL.Image
             level = horizon - 1 - point
