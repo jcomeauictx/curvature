@@ -51,7 +51,7 @@ But despite all those shortcomings, it can be useful in comparison with
 Ulrich's panoramas at the link mentioned above, and seeing which more
 accurately reflects the skyline you see at your current location.
 
-#Getting Started
+# Getting Started
 
 This assumes a typical Debian developer's system. Your mileage may vary.
 

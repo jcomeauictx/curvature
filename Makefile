@@ -30,3 +30,6 @@ look: hgtread.py
 	python -c "import $(<:.py=); print $(<:py=$@)$(ISLA_SAN_JOSE)"
 gitupdate: earthcurvature.py  hgtread.py  Makefile  panorama.py  README.md
 	rsync -avuz $(DRYRUN) $+ /usr/src/jcomeauictx/curvature/
+togit:
+	@echo Relocating to git sources. ^D to return here.
+	cd /usr/src/jcomeauictx/curvature && bash -l
