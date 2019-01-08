@@ -7,10 +7,18 @@ convex-earth (normal) theories.
 '''
 import sys, os, math, hgtread
 from ast import literal_eval as eval  # safe alternative to eval
-from hgtread import logging, look, get_height
+from hgtread import logging, look, get_height, SAMPLE_SECONDS
+from earthcurvature import earthcurvature, R, KM, GLOBE_EARTH_RADIUS
 from PIL import Image
-R = 6371000.0  # mean radius of earth in meters
-DEGREE_IN_METERS = (R * 2 * math.pi) / 360.0
+logging.basicConfig(level=logging.DEBUG if __debug__ else logging.INFO)
+if R not in [float('-inf'), 0.0, float('inf')]:
+    RADIUS = abs(R) * KM * 1000  # mean radius of earth in meters
+else:  # equirectangular assumes distances same as that of the equator
+    RADIUS = GLOBE_EARTH_RADIUS * KM * 1000
+DEGREE_IN_METERS = (RADIUS * 2 * math.pi) / 360.0
+SAMPLE_IN_METERS = DEGREE_IN_METERS / (60 * (60 / SAMPLE_SECONDS))
+SPAN = float(os.getenv('SPAN', '60.0'))
+logging.debug('RADIUS: %s, DEGREE_IN_METERS: %s', RADIUS, DEGREE_IN_METERS)
 
 def distance(lat1, lon1, lat2, lon2):
     '''
@@ -28,7 +36,7 @@ def distance(lat1, lon1, lat2, lon2):
     lat1, lon1, lat2, lon2 = map(math.radians, (lat1, lon1, lat2, lon2))
     x = (lon2 - lon1) * math.cos((lat1 + lat2) / 2)
     y = (lat2 - lat1)
-    d = math.sqrt((x * x) + (y * y)) * R
+    d = math.sqrt((x * x) + (y * y)) * RADIUS
     return d
 
 def move(latitude, longitude, bearing, distance):
@@ -44,7 +52,7 @@ def move(latitude, longitude, bearing, distance):
     average_latitude = latitude + (degrees_y / 2)
     degrees_x = (distance_x * math.cos(average_latitude)) / DEGREE_IN_METERS
 
-def panorama(bearing, latitude, longitude, distance=500, height=1.8, span=60):
+def panorama(bearing, latitude, longitude, distance=500, height=1.8, span=SPAN):
     '''
     display view of horizon from a point at given bearing
 
@@ -58,7 +66,8 @@ def panorama(bearing, latitude, longitude, distance=500, height=1.8, span=60):
     distance at `distance`, so the determined angle should be divided by
     delta(bearing) (`d_bearing`) to get pixels in height.
     '''
-    step = 90.0  # meters to "move" while tracing out horizon
+    step = SAMPLE_IN_METERS  # meters to "move" while tracing out horizon
+    logging.info('radius: %s, step: %s', RADIUS, SAMPLE_IN_METERS)
     # FIXME: this should be passed to `look` function for delta distance
     viewrange = distance * 1000  # km to meters
     height += get_height(latitude, longitude)
@@ -79,6 +88,8 @@ def panorama(bearing, latitude, longitude, distance=500, height=1.8, span=60):
         for index in range(1, len(elevations)):
             # apparent elevation is reduced by eye height above sea level
             elevation = elevations[index] - height
+            # now factor in curvature
+            elevation -= earthcurvature(step * index, 'm', 'm')[1][2]
             theta = math.atan(elevation / (step * index))
             # now convert radians to projected pixels
             projected = int(round(theta / abs(d_bearing)))

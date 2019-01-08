@@ -4,6 +4,9 @@ DEM_DATA := /usr/local/share/gis/hgt
 SCRIPTS := $(wildcard *.py)
 ISLA_SAN_JOSE := (110, 24.164640, -110.312864, 180)
 DRYRUN ?= --dry-run
+EARTH_RADIUS_MILES ?= 0
+COEFFICIENT_OF_REFRACTION ?= .25
+SPAN ?= 60.0
 OPT ?= -OO
 export
 panorama: panorama.py

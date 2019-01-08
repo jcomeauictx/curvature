@@ -66,5 +66,6 @@ sudo apt-get install zip imagemagick
 make N37W120.fetch
 make showfile  # shows part of Northern California west of Millerton Lake
 make N24W111.fetch N24W112.fetch N25W111.fetch N25W112.fetch N26W111.fetch N26W112.fetch
-make panorama  # shows horizon in La Paz, Mexico looking towards Isla San Jose
+make panorama  # shows flat-earth horizon in La Paz, MX looking at Isla San Jose
+make EARTH_RADIUS_MILES=GLOBE panorama  # same view but adjusted for curvature
 ```

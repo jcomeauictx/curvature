@@ -23,9 +23,25 @@ and https://en.wikipedia.org/wiki/Atmospheric_refraction
 from __future__ import print_function, division
 import sys, os, math, logging
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.INFO)
-R = RADIUS = 3959  # miles, per earthcurvature.com
+# a radius of 0 (zero) will be used to implement the Flat Earth Society
+# viewpoint, using an azimuthal equidistant disk centered at the North Pole.
+# a positive radius is a normal spherical earth.
+# we use a negative radius to signify the "hollow earth" viewpoint
+# in which we are living on the _inside_ of the globe.
+# both infinity ('inf') and negative infinity ('-inf') will indicate an
+# equirectangular flat earth.
+GLOBE_EARTH_RADIUS = 3959.0
+try:
+    ER = R = RADIUS = float(os.getenv('EARTH_RADIUS_MILES')) or 0.0
+except ValueError:
+    ER = R = RADIUS = GLOBE_EARTH_RADIUS
 K = float(os.getenv('COEFFICIENT_OF_REFRACTION') or '0.0')
-ER = EFFECTIVE_RADIUS = RADIUS / (1 - K)
+if RADIUS > 0 and not math.isinf(RADIUS):
+    ER = RADIUS / (1 - K)  # effective radius
+elif K:
+    logging.warn('Coefficient of refraction ignored without positive radius')
+    K = 0.0
+CONVEX = math.copysign(1, ER)
 KM = 1.60934  # conversion factor, miles to kilometers, from Google
 UNITS = ['mm', 'cm', 'm', 'km', 'inches', 'feet', 'yards', 'miles']
 
@@ -39,10 +55,13 @@ def earthcurvature(distance=1, unit='miles', dropunit='feet', height=0):
     by this formula, but will be by the dizzib method.
     '''
     distance = float(distance)
-    c = 2 * math.pi * ER
-    d = miles(distance, unit)
-    a = (360 / c) * d
-    h = convert(ER * (1 - math.cos(math.radians(a))), dropunit)
+    if not ER or math.isinf(ER):
+        h = 0
+    else:
+        c = 2 * math.pi * ER
+        d = miles(distance, unit)
+        a = (360 / c) * d
+        h = convert(ER * (1 - math.cos(math.radians(a))), dropunit)
     logging.debug('locals(): %s', locals())
     return 'drop in %.08f %s is %.08f %s', (distance, unit, h, dropunit)
 
@@ -68,14 +87,17 @@ def dizzib(distance=1, unit='miles', dropunit='feet', height=0):
     `sudo ln -s /usr/local/bin/earthcurvature.py /usr/local/bin/dizzib`
     '''
     distance, height = float(distance), float(height)
-    d0 = miles(distance, unit)
-    h0 = miles(height, dropunit)
-    d1 = math.sqrt((h0 ** 2) + (2 * ER * h0))
-    d2 = d0 - d1
-    h1 = convert(math.sqrt((d2 ** 2) + (ER ** 2)) - ER, dropunit)
+    if not ER or math.isinf(ER):
+        h1, d1 = 0, float('inf')
+    else:
+        d0 = miles(distance, unit)
+        h0 = miles(height, dropunit)
+        d1 = math.sqrt((h0 ** 2) + (2 * abs(ER) * h0))
+        d2 = d0 - d1
+        h1 = convert(math.sqrt((d2 ** 2) + (ER ** 2)) - abs(ER), dropunit)
     logging.debug('locals(): %s', locals())
     format_string = 'distance to horizon: %.08f %s, hidden height: %.08f %s'
-    return format_string, (d1, unit, h1, dropunit)
+    return format_string, (d1, unit, CONVEX * h1, dropunit)
 
 def parabolic(distance=1, unit='miles', dropunit='feet', height=0):
     '''
@@ -172,7 +194,5 @@ if __name__ == '__main__':
     # all curvature functions should have same args as earthcurvature
     DEFAULTS = FUNCTION.func_defaults
     ARGS[len(ARGS):] = DEFAULTS[len(ARGS):]
-    logging.debug('effective radius: %.1f, radius: %.1f, ratio: %.3f',
-                  ER, R, (ER / R))
     FORMAT_STRING, RESULTS = FUNCTION(*ARGS)
     print(FORMAT_STRING % RESULTS)
