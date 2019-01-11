@@ -380,15 +380,31 @@ def radians(value):
     '''
     return math.radians(degrees(value))
 
+def getrawdata(north, east):
+    '''
+    returns data in flat, one-dimensional list
+    '''
+    filename, latitude, longitude, d_lat, d_lon = get_hgt_file(north, east)
+    databytes = read(filename)
+    rawdata = [unpack_sample(sample) for sample in chunks(databytes)]
+    return rawdata, north, east, d_lat, d_lon
+
+def histogram(ignored, north, east, *alsoignored):
+    '''
+    return elevation values and counts of quadrant
+    '''
+    rawdata, north, east, d_lat, d_lon = getrawdata(north, east)
+    values = sorted(set(rawdata))
+    return {value: rawdata.count(value) for value in values}
+
 def getdata(north, east):
     '''
     faster than dump_samples, returns only data in list of rows
     '''
-    filename, latitude, longitude, d_lat, d_lon = get_hgt_file(north, east)
-    data = read(filename)
+    data, ignored, ignored, d_lat, d_lon = getrawdata(north, east)
     rowdata = [[unpack_sample(sample) for sample in chunks(row)]
                for row in chunks(data, chunksize=BYTES_PER_ROW)]
-    logging.debug('data loaded into array')
+    logging.debug('data loaded into 2D array')
     return rowdata, north, east, d_lat, d_lon
 
 def flatten(rows):

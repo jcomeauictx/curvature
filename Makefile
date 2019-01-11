@@ -29,7 +29,7 @@ $(DEM_DATA)/%.hgt: /tmp/%.hgt
 	mv $< $@
 %.fetch:
 	$(MAKE) $(DEM_DATA)/$*.hgt
-look: hgtread.py
+look histogram: hgtread.py
 	python -c "import $(<:.py=); print $(<:py=$@)$(ISLA_SAN_JOSE)"
 gitupdate: earthcurvature.py  hgtread.py  Makefile  panorama.py  README.md
 	rsync -avuz $(DRYRUN) $+ /usr/src/jcomeauictx/curvature/

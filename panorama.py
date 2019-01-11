@@ -18,6 +18,11 @@ else:  # equirectangular assumes distances same as that of the equator
 DEGREE_IN_METERS = (RADIUS * 2 * math.pi) / 360.0
 SAMPLE_IN_METERS = DEGREE_IN_METERS / (60 * (60 / SAMPLE_SECONDS))
 SPAN = float(os.getenv('SPAN', '60.0'))
+WHITE = OPAQUE = COMPLETELY = 255
+GRAYEST = 10
+BLACK = NONE = 0
+BLACKPIXEL = (BLACK, BLACK, BLACK, OPAQUE)
+BLUEPIXEL = (NONE, NONE, COMPLETELY, OPAQUE)
 logging.debug('RADIUS: %s, DEGREE_IN_METERS: %s', RADIUS, DEGREE_IN_METERS)
 
 def distance(lat1, lon1, lat2, lon2):
@@ -31,7 +36,7 @@ def distance(lat1, lon1, lat2, lon2):
     from a fixed point. we're not actually going overland to it.
 
     >>> distance(37, 116, 37, 117)
-    88804.21695544747
+    88809.47272660509
     '''
     lat1, lon1, lat2, lon2 = map(math.radians, (lat1, lon1, lat2, lon2))
     x = (lon2 - lon1) * math.cos((lat1 + lat2) / 2)
@@ -79,15 +84,16 @@ def panorama(bearing, latitude, longitude, distance=500, height=1.8, span=SPAN):
     angle = bearing + halfspan
     logging.info('initial angle: %s', math.degrees(angle))
     logging.info('final angle: %s', math.degrees(bearing - halfspan))
-    points = []
+    elevations, points = [], []
     while angle > bearing - halfspan:
-        elevations = look(math.degrees(angle), latitude, longitude, distance)
+        elevations.append(look(
+            math.degrees(angle), latitude, longitude, distance))
         angle -= d_bearing
         logging.info('heights=%s, angle=%s', elevations, math.degrees(angle))
         points.append([])
-        for index in range(1, len(elevations)):
+        for index in range(1, len(elevations[-1])):
             # apparent elevation is reduced by eye height above sea level
-            elevation = elevations[index] - height
+            elevation = elevations[-1][index] - height
             # now factor in curvature
             elevation -= earthcurvature(step * index, 'm', 'm')[1][2]
             theta = math.atan(elevation / (step * index))
@@ -103,17 +109,18 @@ def panorama(bearing, latitude, longitude, distance=500, height=1.8, span=SPAN):
     # make lower half sea blue
     for x in range(width):
         for y in range(horizon, height):
-            panorama.putpixel((x, y), (0, 0, 255, 255))
+            panorama.putpixel((x, y), BLUEPIXEL)
     #panorama.show()
     for index in range(width):
         x = index
-        pointlist = points[index]
-        logging.debug('pointlist: %s', pointlist)
-        previous = height  # determine when to draw line at top of ridge
-        for depth in reversed(range(len(pointlist))):
+        # adding a previous level of `height` will ensure a ridge line
+        # gets drawn on the most distant plot
+        heights, pointlist = elevations[index], points[index] + [height]
+        logging.debug('heights: %s, pointlist: %s', heights, pointlist)
+        for depth in range(len(pointlist) - 2, -1, -1):
             # farthest away will be shown lightest
-            gray = int(max(10, min(255, 255 - depth / 50)))
-            point = pointlist[depth]
+            gray = int(max(GRAYEST, min(WHITE, WHITE - (depth / 50))))
+            point, previous = pointlist[depth], pointlist[depth + 1]
             # remember that (0, 0) is top left of PIL.Image
             level = horizon - 1 - point
             if level > horizon - 1:  # meaning *below* horizon in plot
@@ -121,12 +128,15 @@ def panorama(bearing, latitude, longitude, distance=500, height=1.8, span=SPAN):
                              point, x, level)
                 continue
             y = max(0, level)
+            # mark the top of every ridge
+            if (point > previous):
+                logging.info('marking top of ridge at (%s, %s)', x, y)
+                panorama.putpixel((x, y), BLACKPIXEL)
+            elif point < previous or panorama.getpixel((x, y)) != BLACKPIXEL:
+                panorama.putpixel((x, y), (gray, gray, gray, OPAQUE))
             logging.debug('panorama.putpixel((%s, %s), %s)', x, y, gray)
-            for plot in range(y, horizon):
-                panorama.putpixel((x, plot), (gray, gray, gray, 255))
-            if (y < previous):
-                panorama.putpixel((x, y), (0, 0, 0, 255))
-            previous = y
+            for plot in range(y + 1, horizon):
+                panorama.putpixel((x, plot), (gray, gray, gray, OPAQUE))
     panorama.show()
 
 if __name__ == '__main__':
