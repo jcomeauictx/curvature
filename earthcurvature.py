@@ -33,7 +33,7 @@ logging.basicConfig(level=logging.DEBUG if __debug__ else logging.INFO)
 GLOBE_EARTH_RADIUS = 3959.0
 try:
     ER = R = RADIUS = float(os.getenv('EARTH_RADIUS_MILES')) or 0.0
-except ValueError:
+except (ValueError, TypeError):
     ER = R = RADIUS = GLOBE_EARTH_RADIUS
 K = float(os.getenv('COEFFICIENT_OF_REFRACTION') or '0.0')
 if RADIUS > 0 and not math.isinf(RADIUS):

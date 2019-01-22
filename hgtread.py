@@ -452,7 +452,7 @@ def hgtimage(rowdata, north=None, east=None, d_lat=None, d_lon=None):
     minvalue = values[0] if values[0] > -32768 else values[0:2][-1]
     maxvalue = values[-1]
     logging.debug('minvalue: %s, maxvalue: %s', minvalue, maxvalue)
-    if os.getenv('SHOW_BADWATER') and -32768 < minvalue < 0:
+    if not os.getenv('OCEANFRONT') and -32768 < minvalue < 0:
         logging.debug('setting minimum value to one')
         flattened = [n - minvalue + 1 for n in flattened]
         maxvalue += -minvalue + 1
