@@ -120,11 +120,6 @@ def panorama(bearing, latitude, longitude, distance=500,
     logging.info('width of image: %d', width)
     # initialize to sky blue
     panorama = Image.new('RGBA', (width, image_height), (128, 128, 255, 255))
-    if OCEANFRONT:
-        # make lower half sea blue
-        for x in range(width):
-            for y in range(horizon, image_height):
-                panorama.putpixel((x, y), BLUEPIXEL)
     for index in range(width):
         x = index
         # adding a previous level of `image_height` will ensure a ridge line
@@ -133,7 +128,7 @@ def panorama(bearing, latitude, longitude, distance=500,
         # checking the arc of view of each point
         pointlist = elevations[index]
         pointlist = [pointlist[0]] + pointlist + [[None, None, image_height]]
-        logging.debug('pointlist: %s', pointlist)
+        logging.debug('index: %d, pointlist: %s', index, pointlist)
         color = WHITEPIXEL
         for depth in range(len(pointlist) - 2, 0, -1):
             context = pointlist[depth - 1:depth + 2]
@@ -166,8 +161,8 @@ def panorama(bearing, latitude, longitude, distance=500,
                     logging.debug('not top of ridge at (%s, %s)', x, y)
                     putpixel(panorama, (x, y), color)
                 logging.debug('painting %s from %d to %d',
-                              color, y + 1, context[closer][y_image])
-                for plot in range(y + 1, context[closer][y_image]):
+                              color, y + 1, context[closer][y_image] + 1)
+                for plot in range(y + 1, context[closer][y_image] + 1):
                     putpixel(panorama, (x, plot), color)
     panorama.show()
 
