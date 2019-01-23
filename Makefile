@@ -3,6 +3,7 @@ SRTM3 := https://dds.cr.usgs.gov/srtm/version2_1/SRTM3
 DEM_DATA := /usr/local/share/gis/hgt
 SCRIPTS := $(wildcard *.py)
 ISLA_SAN_JOSE := (110, 24.164640, -110.312864, 180)
+BUCKEYE := (208, 37.053, -119.393, 200)
 # estimate camera (eye) height is 5 feet converted to meters
 CAMERA_HEIGHT = 1.538
 DRYRUN ?= --dry-run
@@ -14,6 +15,8 @@ OCEANFRONT ?= True
 export
 panorama: panorama.py
 	python $(OPT) -c "import $(<:.py=); print $(<:py=$@)$(ISLA_SAN_JOSE)"
+buckeye: panorama.py
+	python $(OPT) -c "import $(<:.py=); print $(<:py=panorama)$(BUCKEYE)"
 showfile: hgtread.py
 	DUMP_SAMPLES=1 python $< 37.0102656 -119.7659941
 %.doctest: %.py

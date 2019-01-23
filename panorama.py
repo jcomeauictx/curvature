@@ -230,7 +230,7 @@ def correct_for_no_data(elevations, raw, farthest):
 if __name__ == '__main__':
     args = sys.argv[1:]
     if args:
-        panorama(*args)
+        panorama(*map(float, args))
     else:
         import doctest
         doctest.testmod()
