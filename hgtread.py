@@ -538,7 +538,7 @@ def show(image, prefix='hgt'):
         logging.debug('deleting image %s', path)
         os.unlink(path)
 
-def look(angle, north, east, distance):
+def look_equirectangular_rough(angle, north, east, distance):
     '''
     return list of elevation in the given direction
 
@@ -562,6 +562,8 @@ def look(angle, north, east, distance):
         east += d_lon
         traversed += d_travel
     return elevations
+
+look = look_equirectangular_rough
 
 if __name__ == "__main__":
     show(hgtimage(*getdata(*sys.argv[1:])), '_'.join(sys.argv[1:]))
