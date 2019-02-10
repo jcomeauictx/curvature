@@ -2,12 +2,12 @@ DUMP_SAMPLES ?= 1
 SRTM3 := https://dds.cr.usgs.gov/srtm/version2_1/SRTM3
 DEM_DATA := /usr/local/share/gis/hgt
 SCRIPTS := $(wildcard *.py)
-ISLA_SAN_JOSE := (110, 24.164640, -110.312864, 180)
-BUCKEYE := (208, 37.053, -119.393, 200)
+ISLA_SAN_JOSE := (-20, 24.164640, -110.312864, 180)
+BUCKEYE := (-118, 37.053, -119.393, 200)
 # estimate camera (eye) height is 5 feet converted to meters
 CAMERA_HEIGHT = 1.538
 DRYRUN ?= --dry-run
-EARTH_RADIUS_MILES ?= 0
+EARTH_RADIUS_MILES ?= inf
 COEFFICIENT_OF_REFRACTION ?= .25
 SPAN ?= 60.0
 OPT ?= -OO
@@ -37,8 +37,13 @@ $(DEM_DATA)/%.hgt: /tmp/%.hgt
 	$(MAKE) $(DEM_DATA)/$*.hgt
 look histogram: hgtread.py
 	python -c "import $(<:.py=); print $(<:py=$@)$(ISLA_SAN_JOSE)"
-gitupdate: earthcurvature.py  hgtread.py  Makefile  panorama.py  README.md
+gitupdate: earthcurvature.py  hgtread.py  Makefile  panorama.py  README.md screenshots
 	rsync -avuz $(DRYRUN) $+ /usr/src/jcomeauictx/curvature/
 togit:
 	@echo Relocating to git sources. ^D to return here.
 	cd /usr/src/jcomeauictx/curvature && bash -l
+shell:
+	# bring up a subshell with environment variables exported
+	bash -l
+env:
+	env

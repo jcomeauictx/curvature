@@ -8,14 +8,22 @@ see also http://www.movable-type.co.uk/scripts/latlong.html
 '''
 import sys, os, struct, glob, logging, math, pprint, tempfile
 from PIL import Image
+from earthcurvature import earthcurvature, R, KM, GLOBE
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.INFO)
 DEM_DATA = os.getenv('DEM_DATA', '/usr/local/share/gis/hgt')
 SAMPLE_SECONDS = 3  # 3 for SRTM3, 1 for SRTM1
-SAMPLES_PER_ROW = 1201  # 1201 for SRTM3, 3601 for SRTM1
+DEGREE_IN_SECONDS = 60 * 60
+# SAMPLES_PER_ROW 1201 for SRTM3, 3601 for SRTM1
+SAMPLES_PER_ROW = (DEGREE_IN_SECONDS / SAMPLE_SECONDS) + 1
+DEGREE_IN_SAMPLES = DEGREE_IN_SECONDS / SAMPLE_SECONDS
 BYTES_PER_ROW = SAMPLES_PER_ROW * 2
 PRETTYPRINTER = pprint.PrettyPrinter()
 MAXVALUE = 9000  # meters. highest elevation on earth is about 9000m.
 OPEN_FILES = {}
+if R not in [float('-inf'), 0.0, float('inf')]:
+    RADIUS = abs(R) * KM * 1000  # mean radius of earth in meters
+else:  # equirectangular assumes distances same as latitudes along meridian
+    RADIUS = GLOBE * KM * 1000
 
 class Degree(tuple):
     '''
@@ -74,6 +82,7 @@ def chunks(data, chunksize=2):
 
     https://stackoverflow.com/a/312464/493161
     '''
+    logging.debug('data starts with: %r', data[:10])
     for index in range(0, len(data), chunksize):
         yield data[index:index + chunksize]
 
@@ -196,7 +205,10 @@ def unpack_sample(sample):
     >>> unpack_sample('\x88\x88')
     -30584
     '''
-    unpacked = struct.unpack('>h', sample)[0]
+    try:
+        unpacked = struct.unpack('>h', sample)[0]
+    except struct.error:
+        raise ValueError('Bad sample for short: %r' % sample)
     return unpacked
 
 def get_hgt_file(north, east):
@@ -402,8 +414,8 @@ def getdata(north, east):
     faster than dump_samples, returns only data in list of rows
     '''
     data, ignored, ignored, d_lat, d_lon = getrawdata(north, east)
-    rowdata = [[unpack_sample(sample) for sample in chunks(row)]
-               for row in chunks(data, chunksize=BYTES_PER_ROW)]
+    logging.debug('len(data): %d, sample: %r', len(data), data[:10])
+    rowdata = chunks(data, chunksize=SAMPLES_PER_ROW)
     logging.debug('data loaded into 2D array')
     return rowdata, north, east, d_lat, d_lon
 
@@ -537,33 +549,6 @@ def show(image, prefix='hgt'):
     if os.getenv('DELETE_IMAGE_AFTER_DISPLAY'):
         logging.debug('deleting image %s', path)
         os.unlink(path)
-
-def look_equirectangular_rough(angle, north, east, distance):
-    '''
-    return list of elevation in the given direction
-
-    FIXME: assuming second of arc is 30 meters in any direction which
-    is only nearly true at the equator.
-    '''
-    logging.info('look(%s, %s, %s, %s)', angle, north, east, distance)
-    elevations = []
-    traversed = 0
-    radians = math.radians(angle)
-    distance_per_second = 30
-    distance *= 1000  # convert km to meters
-    d_travel = distance_per_second * SAMPLE_SECONDS
-    d_lat = math.sin(radians) / (60 * (60 / SAMPLE_SECONDS))
-    d_lon = math.cos(radians) / (60 * (60 / SAMPLE_SECONDS))
-    while traversed < distance:
-        elevation = get_height(north, east)
-        elevations.append(elevation)
-        radians = math.radians(angle)
-        north += d_lat
-        east += d_lon
-        traversed += d_travel
-    return elevations
-
-look = look_equirectangular_rough
 
 if __name__ == "__main__":
     show(hgtimage(*getdata(*sys.argv[1:])), '_'.join(sys.argv[1:]))

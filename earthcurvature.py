@@ -30,11 +30,13 @@ logging.basicConfig(level=logging.DEBUG if __debug__ else logging.INFO)
 # in which we are living on the _inside_ of the globe.
 # both infinity ('inf') and negative infinity ('-inf') will indicate an
 # equirectangular flat earth.
-GLOBE_EARTH_RADIUS = 3959.0
+GLOBE = 3959.0
 try:
-    ER = R = RADIUS = float(os.getenv('EARTH_RADIUS_MILES')) or 0.0
-except (ValueError, TypeError):
-    ER = R = RADIUS = GLOBE_EARTH_RADIUS
+    ER = R = RADIUS = float(os.getenv('EARTH_RADIUS_MILES', 'inf'))
+except (ValueError, TypeError) as failed_parse:
+    # evaluate GLOBE or -GLOBE
+    logging.warn('Failed parsing EARTH_RADIUS_MILES as float: %s', failed_parse)
+    ER = R = RADIUS = eval(os.getenv('EARTH_RADIUS_MILES'))
 K = float(os.getenv('COEFFICIENT_OF_REFRACTION') or '0.0')
 if RADIUS > 0 and not math.isinf(RADIUS):
     ER = RADIUS / (1 - K)  # effective radius
