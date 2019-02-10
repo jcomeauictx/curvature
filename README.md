@@ -70,7 +70,12 @@ make EARTH_RADIUS_MILES=-GLOBE panorama  # same view inside "hollow earth"
 make EARTH_RADIUS_MILES=0 panorama  # same view in classic "flat earth" theory
 ```
 
-* [![Equirectangular](screenshots/equirectangular.png)](screenshots/equirectangular_large.png)
-* [![Globe](screenshots/globe.png)](screenshots/globe_large.png)
-* [![Hollow](screenshots/hollow.png)](screenshots/hollow_large.png)
-* [![Classic FE](screenshots/classic_fe.png)](screenshots/classic_fe_large.png)
+# Screenshots
+
+[![`make panorama` (Equirectangular Earth)](screenshots/equirectangular.png)](screenshots/equirectangular_large.png)
+
+[![`make EARTH_RADIUS_MILES=GLOBE` (Globe Earth)](screenshots/globe.png)](screenshots/globe_large.png)
+
+[![`make EARTH_RADIUS_MILES=-GLOBE` (Hollow Earth)](screenshots/hollow.png)](screenshots/hollow_large.png)
+
+[![`make EARTH_RADIUS_MILES=0` (Classic Flat Earth)](screenshots/classic_fe.png)](screenshots/classic_fe_large.png)
