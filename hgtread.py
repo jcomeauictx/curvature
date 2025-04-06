@@ -335,6 +335,7 @@ def get_height(north, east):
     dms_east = Degree(degrees(east))
     offset = north_offset(dms_north, d_lat) + east_offset(dms_east, d_lon)
     infile = OPEN_FILES.setdefault(filename, open(filename, 'rb'))
+    logging.debug('seeking to offset %s', offset)
     infile.seek(offset)
     sample = infile.read(2)
     height = unpack_sample(sample)
@@ -552,3 +553,4 @@ def show(image, prefix='hgt'):
 
 if __name__ == "__main__":
     show(hgtimage(*getdata(*sys.argv[1:])), '_'.join(sys.argv[1:]))
+# vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4

@@ -14,9 +14,9 @@ OPT ?= -OO
 OCEANFRONT ?= True
 export
 panorama: panorama.py
-	python $(OPT) -c "import $(<:.py=); print $(<:py=$@)$(ISLA_SAN_JOSE)"
+	python $(OPT) -c "import $(<:.py=); print($(<:py=$@)$(ISLA_SAN_JOSE))"
 buckeye: panorama.py
-	python $(OPT) -c "import $(<:.py=); print $(<:py=panorama)$(BUCKEYE)"
+	python $(OPT) -c "import $(<:.py=); print($(<:py=panorama)$(BUCKEYE))"
 showfile: hgtread.py
 	DUMP_SAMPLES=1 python $< 37.0102656 -119.7659941
 %.doctest: %.py
@@ -31,7 +31,10 @@ segments: 30_mile_segments.ps
 	 (dd if=/dev/zero of=$(@:.zip=) bs=2884802 count=1; zip $@ $(@:.zip=))
 /tmp/%.hgt: /tmp/%.hgt.zip
 	cd /tmp && unzip -u $<
-$(DEM_DATA)/%.hgt: /tmp/%.hgt
+$(DEM_DATA):
+	sudo mkdir -p $@
+	sudo chown -R $(USER):$(USER) $@
+$(DEM_DATA)/%.hgt: /tmp/%.hgt | $(DEM_DATA)
 	mv $< $@
 %.fetch:
 	$(MAKE) $(DEM_DATA)/$*.hgt
