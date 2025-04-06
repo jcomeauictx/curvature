@@ -3,7 +3,7 @@ SHELL := /bin/bash
 MAKEFLAGS += --no-builtin-rules
 # now begins the actual Makefile
 DUMP_SAMPLES ?= 1
-SRTM3 := https://dds.cr.usgs.gov/srtm/version2_1/SRTM3
+SRTM3 := http://ns004.unternet.net/hgt
 DEM_DATA := /usr/local/share/gis/hgt
 SCRIPTS := $(wildcard *.py)
 ISLA_SAN_JOSE := (-20, 24.164640, -110.312864, 180)
