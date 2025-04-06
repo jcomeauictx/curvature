@@ -12,16 +12,19 @@ COEFFICIENT_OF_REFRACTION ?= .25
 SPAN ?= 60.0
 OPT ?= -OO
 OCEANFRONT ?= True
+REQUIRED := N24W111.hgt  N25W112.hgt  N36W115.hgt  N37W115.hgt \
+ N43W120.hgt N24W112.hgt  N26W111.hgt  N36W116.hgt  N37W120.hgt N25W111.hgt \
+ N26W112.hgt  N36W117.hgt  N39W119.hgt
 export
-panorama: panorama.py
+panorama: panorama.py $(REQUIRED:.hgt=.fetch)
 	python $(OPT) -c "import $(<:.py=); print($(<:py=$@)$(ISLA_SAN_JOSE))"
-buckeye: panorama.py
+buckeye: panorama.py $(REQUIRED:.hgt=.fetch)
 	python $(OPT) -c "import $(<:.py=); print($(<:py=panorama)$(BUCKEYE))"
-showfile: hgtread.py
+showfile: hgtread.py $(REQUIRED:.hgt=.fetch)
 	DUMP_SAMPLES=1 python $< 37.0102656 -119.7659941
 %.doctest: %.py
 	python -m doctest $<
-doctests: $(SCRIPTS:.py=.doctest)
+doctests: $(REQUIRED:.hgt=.fetch) $(SCRIPTS:.py=.doctest)
 overview: overview.py
 	python $< 37.0102656 -119.7659941
 segments: 30_mile_segments.ps
@@ -36,8 +39,7 @@ $(DEM_DATA):
 	sudo chown -R $(USER):$(USER) $@
 $(DEM_DATA)/%.hgt: /tmp/%.hgt | $(DEM_DATA)
 	mv $< $@
-%.fetch:
-	$(MAKE) $(DEM_DATA)/$*.hgt
+%.fetch: $(DEM_DATA)/%.hgt
 look histogram: hgtread.py
 	python -c "import $(<:.py=); print $(<:py=$@)$(ISLA_SAN_JOSE)"
 gitupdate: earthcurvature.py  hgtread.py  Makefile  panorama.py  README.md screenshots
