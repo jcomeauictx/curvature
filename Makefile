@@ -15,7 +15,13 @@ OCEANFRONT ?= True
 REQUIRED := N24W111.hgt  N25W112.hgt  N36W115.hgt  N37W115.hgt \
  N43W120.hgt N24W112.hgt  N26W111.hgt  N36W116.hgt  N37W120.hgt N25W111.hgt \
  N26W112.hgt  N36W117.hgt  N39W119.hgt
-export
+ifneq ($(SHOWENV),)
+ export
+else
+ export EARTH_RADIUS_MILES COEFFICIENT_OF_REFRACTION SPAN DEM_DATA OCEANFRONT \
+  ADAPTIVE_LIGHTENING SHOW_LOCATION DUMP_SAMPLES DELETE_IMAGE_AFTER_DISPLAY \
+  CAMERA_HEIGHT
+endif
 panorama: panorama.py $(REQUIRED:.hgt=.fetch)
 	python $(OPT) -c "import $(<:.py=); print($(<:py=$@)$(ISLA_SAN_JOSE))"
 buckeye: panorama.py $(REQUIRED:.hgt=.fetch)
@@ -51,4 +57,9 @@ shell:
 	# bring up a subshell with environment variables exported
 	bash -l
 env:
-	env
+ifneq ($(SHOWENV),)
+	$@
+else
+	$(MAKE) SHOWENV=1 $@
+endif
+.PHONY: %.fetch
