@@ -38,6 +38,7 @@ $(DEM_DATA):
 $(DEM_DATA)/%.hgt: /tmp/%.hgt | $(DEM_DATA)
 	mv $< $@
 %.fetch: $(DEM_DATA)/%.hgt
+	@echo $*.fetch invoked
 panorama: panorama.py $(REQUIRED:.hgt=.fetch)
 	python $(OPT) -c "import $(<:.py=); print($(<:py=$@)$(ISLA_SAN_JOSE))"
 buckeye: panorama.py $(REQUIRED:.hgt=.fetch)
@@ -68,3 +69,4 @@ else
 	$(MAKE) SHOWENV=1 $@
 endif
 .PHONY: %.fetch
+.PRECIOUS: $(DEM_DATA)/%.hgt
