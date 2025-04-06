@@ -14,7 +14,7 @@ DEM_DATA = os.getenv('DEM_DATA', '/usr/local/share/gis/hgt')
 SAMPLE_SECONDS = 3  # 3 for SRTM3, 1 for SRTM1
 DEGREE_IN_SECONDS = 60 * 60
 # SAMPLES_PER_ROW 1201 for SRTM3, 3601 for SRTM1
-SAMPLES_PER_ROW = (DEGREE_IN_SECONDS / SAMPLE_SECONDS) + 1
+SAMPLES_PER_ROW = int(DEGREE_IN_SECONDS / SAMPLE_SECONDS) + 1
 DEGREE_IN_SAMPLES = DEGREE_IN_SECONDS / SAMPLE_SECONDS
 BYTES_PER_ROW = SAMPLES_PER_ROW * 2
 PRETTYPRINTER = pprint.PrettyPrinter()
@@ -60,7 +60,7 @@ class Degree(tuple):
         (0, 0, 0)
 
         >>> Degree((-1, 0, 0)) + 3
-        (0, -59.0, -57.0)
+        (0.0, -59.0, -57.0)
         '''
         if seconds == 0:
             return self
@@ -176,7 +176,7 @@ def get_column(data, column):
     >>> s[:16]==t[:16]  # this is now unnecessary now previous test passes
     True
     '''
-    columndata = ''
+    columndata = b''
     for index in range(SAMPLES_PER_ROW):
         offset = (BYTES_PER_ROW * index) + (column * 2)
         columndata += data[offset:offset + 2]
@@ -200,9 +200,9 @@ def unpack_sample(sample):
     causes such as shadowing, phase unwrapping anomalies, or other
     radar-specific causes. Voids are flagged with the value -32768."
 
-    >>> unpack_sample('\x80\x00')
+    >>> unpack_sample(b'\x80\x00')
     -32768
-    >>> unpack_sample('\x88\x88')
+    >>> unpack_sample(b'\x88\x88')
     -30584
     '''
     try:
@@ -302,7 +302,7 @@ def north_offset(north, direction):
         logging.debug('north_offset from opposite end of file')
         row = SAMPLES_PER_ROW - row - 1
     logging.debug('row: %d', row)
-    return row * BYTES_PER_ROW
+    return int(row * BYTES_PER_ROW)
 
 def east_offset(east, direction):
     '''
@@ -320,7 +320,7 @@ def east_offset(east, direction):
         logging.debug('east_offset from opposite end of row')
         offset = SAMPLES_PER_ROW - offset - 1
     logging.debug('offset after: %d', offset)
-    return offset * 2  # 2 bytes per sample
+    return int(offset * 2)  # 2 bytes per sample
 
 def get_height(north, east):
     '''
@@ -358,7 +358,7 @@ def dms(degrees, roundto=SAMPLE_SECONDS):
     d = int(degrees)
     m = int((degrees - d) * 60)
     s = (degrees - d - (m / 60.0)) * 3600
-    rounded_s = (int(s) / roundto) * roundto
+    rounded_s = int((int(s) / roundto) * roundto)
     return (d, m, rounded_s)
 
 def decimal(dms):
