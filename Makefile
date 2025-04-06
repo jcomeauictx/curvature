@@ -38,7 +38,7 @@ $(DEM_DATA):
 $(DEM_DATA)/%.hgt: /tmp/%.hgt | $(DEM_DATA)
 	mv $< $@
 %.fetch: $(DEM_DATA)/%.hgt
-	@echo $*.fetch invoked
+	@echo $* already downloaded
 panorama: panorama.py $(REQUIRED:.hgt=.fetch)
 	python $(OPT) -c "import $(<:.py=); print($(<:py=$@)$(ISLA_SAN_JOSE))"
 buckeye: panorama.py $(REQUIRED:.hgt=.fetch)
