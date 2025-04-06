@@ -298,7 +298,7 @@ def spherical_move(latitude, longitude, bearing, distance,
     round it
 
     >>> tuple(map(round, spherical_move(0.0, -110.0, -90, DEGREE_IN_METERS)))
-    (0.0, -111.0)
+    (0, -111)
     >>> spherical_move(60.0, -110.0, -90, DEGREE_IN_METERS)
     (60.0, -112.0)
     '''
@@ -423,9 +423,9 @@ def maximum_delta(latitude, longitude, bearing, distance, span):
     find the maximum distance to move that "sees" all SRTM3 samples
 
     >>> round(maximum_delta(0, 0, 0, 0, 0))
-    93.0
+    93
     >>> round(maximum_delta(60, 0, 0, 0, 0))
-    46.0
+    46
     '''
     extremes = latitude_extremes(latitude, longitude, bearing, distance, span)
     seconds = float(SAMPLE_SECONDS) / 3600
