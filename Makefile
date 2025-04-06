@@ -1,3 +1,7 @@
+# use Bash and disable builtin rules
+SHELL := /bin/bash
+MAKEFLAGS += --no-builtin-rules
+# now begins the actual Makefile
 DUMP_SAMPLES ?= 1
 SRTM3 := https://dds.cr.usgs.gov/srtm/version2_1/SRTM3
 DEM_DATA := /usr/local/share/gis/hgt
@@ -22,6 +26,18 @@ else
   ADAPTIVE_LIGHTENING SHOW_LOCATION DUMP_SAMPLES DELETE_IMAGE_AFTER_DISPLAY \
   CAMERA_HEIGHT
 endif
+all: panorama
+/tmp/%.hgt.zip:
+	cd /tmp && wget -nc $(SRTM3)/North_America/$*.hgt.zip || \
+	 (dd if=/dev/zero of=$(@:.zip=) bs=2884802 count=1; zip $@ $(@:.zip=))
+/tmp/%.hgt: /tmp/%.hgt.zip
+	cd /tmp && unzip -u $<
+$(DEM_DATA):
+	sudo mkdir -p $@
+	sudo chown -R $(USER):$(USER) $@
+$(DEM_DATA)/%.hgt: /tmp/%.hgt | $(DEM_DATA)
+	mv $< $@
+%.fetch: $(DEM_DATA)/%.hgt
 panorama: panorama.py $(REQUIRED:.hgt=.fetch)
 	python $(OPT) -c "import $(<:.py=); print($(<:py=$@)$(ISLA_SAN_JOSE))"
 buckeye: panorama.py $(REQUIRED:.hgt=.fetch)
@@ -35,17 +51,6 @@ overview: overview.py
 	python $< 37.0102656 -119.7659941
 segments: 30_mile_segments.ps
 	gs $<
-/tmp/%.hgt.zip:
-	cd /tmp && wget -nc $(SRTM3)/North_America/$*.hgt.zip || \
-	 (dd if=/dev/zero of=$(@:.zip=) bs=2884802 count=1; zip $@ $(@:.zip=))
-/tmp/%.hgt: /tmp/%.hgt.zip
-	cd /tmp && unzip -u $<
-$(DEM_DATA):
-	sudo mkdir -p $@
-	sudo chown -R $(USER):$(USER) $@
-$(DEM_DATA)/%.hgt: /tmp/%.hgt | $(DEM_DATA)
-	mv $< $@
-%.fetch: $(DEM_DATA)/%.hgt
 look histogram: hgtread.py
 	python -c "import $(<:.py=); print $(<:py=$@)$(ISLA_SAN_JOSE)"
 gitupdate: earthcurvature.py  hgtread.py  Makefile  panorama.py  README.md screenshots
