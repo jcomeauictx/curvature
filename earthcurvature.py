@@ -130,33 +130,63 @@ def convert(distance, unit = 'miles'):
         raise ValueError('given distance unit %s not in %s', unit, UNITS)
 
 def km(_miles):
+    '''
+    convert miles to kilometers
+    '''
     return _miles * KM
 
 def km_to_miles(amount):
+    '''
+    convert kilometers to miles
+    '''
     return amount / KM
 
 def m(_miles):
+    '''
+    convert miles to meters
+    '''
     return km(_miles) * 1000
 
 def m_to_miles(amount):
+    '''
+    convert meters to miles
+    '''
     return km_to_miles(amount / 1000)
 
 def cm(_miles):
+    '''
+    convert miles to centimeters
+    '''
     return km(_miles) * 100000
 
 def cm_to_miles(amount):
+    '''
+    convert centimeters to miles
+    '''
     return km_to_miles(amount / 100000)
 
 def mm(_miles):
+    '''
+    convert miles to millimeters
+    '''
     return km(_miles) * 1000000
 
 def mm_to_miles(amount):
+    '''
+    convert millimeters to miles
+    '''
     return km_to_miles(amount / 1000000)
 
 def yards(_miles):
+    '''
+    convert miles to yards
+    '''
     return feet(_miles) / 3
 
 def yards_to_miles(amount):
+    '''
+    convert yards to miles
+    '''
     return feet_to_miles(amount * 3)
 
 def feet(_miles):
