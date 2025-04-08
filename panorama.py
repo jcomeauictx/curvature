@@ -5,8 +5,7 @@ calculate and display panorama of horizon from given point and bearing
 various views can be generated based on flat-earth, concave-earth, and
 convex-earth views.
 '''
-import sys, os, math, hgtread
-from ast import literal_eval as eval  # safe alternative to eval
+import sys, os, math  # pylint: disable=multiple-imports
 from hgtread import logging, get_height
 from hgtread import RADIUS, SAMPLE_SECONDS
 from earthcurvature import R, earthcurvature
