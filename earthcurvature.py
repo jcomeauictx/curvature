@@ -23,7 +23,6 @@ and https://en.wikipedia.org/wiki/Atmospheric_refraction
 from __future__ import print_function, division
 # pylint: disable=consider-using-f-string
 import sys, os, math, logging  # pylint: disable=multiple-imports
-from ast import literal_eval
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.INFO)
 # a radius of 0 (zero) will be used to implement the Flat Earth Society
 # viewpoint, using an azimuthal equidistant disk centered at the North Pole.
@@ -33,13 +32,16 @@ logging.basicConfig(level=logging.DEBUG if __debug__ else logging.INFO)
 # both infinity ('inf') and negative infinity ('-inf') will indicate an
 # equirectangular flat earth.
 GLOBE = 3959.0
+# evaluate GLOBE or -GLOBE passed in as EARTH_RADIUS_MILES
+R_STRING = os.getenv('EARTH_RADIUS_MILES', 'inf')
+logging.debug('earth radius as string: %s', R_STRING)
+# NOTE: ast.literal_eval WILL NOT WORK here.
+# float('inf') works, float('GLOBE') does not.
+# likewise, eval('GLOBE') works, and eval('inf') does not.
 try:
-    ER = R = RADIUS = float(os.getenv('EARTH_RADIUS_MILES', 'inf'))
-except (ValueError, TypeError) as failed_parse:
-    # evaluate GLOBE or -GLOBE
-    logging.warning('Failed parsing EARTH_RADIUS_MILES as float: %s',
-                    failed_parse)
-    ER = R = RADIUS = literal_eval(os.getenv('EARTH_RADIUS_MILES'))
+    ER = R = RADIUS = float(eval(R_STRING))  # pylint: disable=eval-used
+except (NameError, ValueError):
+    ER = R = RADIUS = float(R_STRING)
 K = float(os.getenv('COEFFICIENT_OF_REFRACTION') or '0.0')
 if RADIUS > 0 and not math.isinf(RADIUS):
     ER = RADIUS / (1 - K)  # effective radius
