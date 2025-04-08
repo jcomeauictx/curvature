@@ -14,7 +14,8 @@ DEM_DATA = os.getenv('DEM_DATA', '/usr/local/share/gis/hgt')
 SAMPLE_SECONDS = 3  # 3 for SRTM3, 1 for SRTM1
 DEGREE_IN_SECONDS = 60 * 60
 # SAMPLES_PER_ROW 1201 for SRTM3, 3601 for SRTM1
-SAMPLES_PER_ROW = int(DEGREE_IN_SECONDS / SAMPLE_SECONDS) + 1
+SAMPLES_PER_ROW = DEGREE_IN_SECONDS // SAMPLE_SECONDS + 1
+logging.debug('SAMPLES_PER_ROW: %s', SAMPLES_PER_ROW)
 DEGREE_IN_SAMPLES = DEGREE_IN_SECONDS / SAMPLE_SECONDS
 BYTES_PER_ROW = SAMPLES_PER_ROW * 2
 PRETTYPRINTER = pprint.PrettyPrinter()
@@ -297,12 +298,12 @@ def north_offset(north, direction):
     2879998
     '''
     logging.debug('north: %s, direction: %d', repr(north), direction)
-    row = abs((north[1] * 60) + north[2]) / abs(direction)
+    row = abs((north[1] * 60) + north[2]) // abs(direction)
     if math.copysign(1, direction) != north.sign:
         logging.debug('north_offset from opposite end of file')
         row = SAMPLES_PER_ROW - row - 1
-    logging.debug('row: %d', row)
-    return int(row * BYTES_PER_ROW)
+    logging.debug('north_offset row: %s', row)
+    return row * BYTES_PER_ROW
 
 def east_offset(east, direction):
     '''
@@ -314,13 +315,13 @@ def east_offset(east, direction):
     0
     '''
     logging.debug('east: %s, direction: %d', repr(east), direction)
-    offset = abs((east[1]) * 60 + east[2]) / abs(direction)
-    logging.debug('offset before: %d', offset)
+    offset = abs((east[1]) * 60 + east[2]) // abs(direction)
+    logging.debug('east_offset before: %d', offset)
     if math.copysign(1, direction) != east.sign:
         logging.debug('east_offset from opposite end of row')
         offset = SAMPLES_PER_ROW - offset - 1
-    logging.debug('offset after: %d', offset)
-    return int(offset * 2)  # 2 bytes per sample
+    logging.debug('east_offset after: %s', offset)
+    return offset * 2  # 2 bytes per sample
 
 def get_height(north, east):
     '''
@@ -358,7 +359,7 @@ def dms(degrees, roundto=SAMPLE_SECONDS):
     d = int(degrees)
     m = int((degrees - d) * 60)
     s = (degrees - d - (m / 60.0)) * 3600
-    rounded_s = int((int(s) / roundto) * roundto)
+    rounded_s = (int(s) // roundto) * roundto
     return (d, m, rounded_s)
 
 def decimal(dms):
