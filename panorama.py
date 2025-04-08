@@ -87,8 +87,10 @@ def correct_for_no_data(elevations, raw, farthest):
                 last_known = elevation
                 state = 'scanning'
 
-def panorama(bearing, latitude, longitude, distance=500,
-             height=CAMERA_HEIGHT, span=SPAN):
+def panorama(bearing, latitude, longitude,
+        # pylint: disable=too-many-arguments, too-many-positional-arguments
+        # pylint: disable=too-many-locals, too-many-statements
+        distance=500, height=CAMERA_HEIGHT, span=SPAN):
     '''
     display view of horizon from a point at given bearing
 
@@ -148,7 +150,7 @@ def panorama(bearing, latitude, longitude, distance=500,
     width = len(elevations)
     logging.info('width of image: %d', width)
     # initialize to sky blue
-    panorama = Image.new('RGBA', (width, image_height), (128, 128, 255, 255))
+    _panorama = Image.new('RGBA', (width, image_height), (128, 128, 255, 255))
     for index in range(width):
         x = index
         # adding a previous level of `image_height` will ensure a ridge line
@@ -183,22 +185,23 @@ def panorama(bearing, latitude, longitude, distance=500,
                 # mark the top of every ridge
                 if y < context[farther][y_image]:
                     logging.debug('marking top of ridge at (%s, %s)', x, y)
-                    putpixel(panorama, (x, y), ridgecolor)
+                    putpixel(_panorama, (x, y), ridgecolor)
                 # don't overwrite black pixel from previous ridgeline
                 elif (y > context[farther][y_image] or
-                        getpixel(panorama, (x, y)) != ridgecolor):
+                        getpixel(_panorama, (x, y)) != ridgecolor):
                     logging.debug('not top of ridge at (%s, %s)', x, y)
-                    putpixel(panorama, (x, y), color)
+                    putpixel(_panorama, (x, y), color)
                 logging.debug('painting %s from %d to %d',
                               color, y + 1, context[closer][y_image] + 1)
                 for plot in range(y + 1, context[closer][y_image] + 1):
-                    putpixel(panorama, (x, plot), color)
-    panorama.show()
+                    putpixel(_panorama, (x, plot), color)
+    _panorama.show()
 
 def look(angle, north, east, distance, d_travel):
     '''
     return list of elevation in the given direction
     '''
+    # pylint: disable=unused-variable
     logging.info('look(%s, %s, %s, %s)', angle, north, east, distance)
     elevations = []
     traversed = 0
@@ -227,7 +230,7 @@ def spherical_distance(lat1, lon1, lat2, lon2):
     '''
     lat1, lon1, lat2, lon2 = map(math.radians, (lat1, lon1, lat2, lon2))
     x = (lon2 - lon1) * math.cos((lat1 + lat2) / 2)
-    y = (lat2 - lat1)
+    y = lat2 - lat1
     d = math.sqrt((x * x) + (y * y)) * RADIUS
     return d
 
