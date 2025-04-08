@@ -6,7 +6,7 @@ from http://gis.stackexchange.com/a/43756/1291
 
 see also http://www.movable-type.co.uk/scripts/latlong.html
 '''
-# pylint: disable=consider-using-f-string
+# pylint: disable=consider-using-f-string, raise-missing-from
 import sys, os, struct, glob, logging  # pylint: disable=multiple-imports
 import math, pprint, tempfile  # pylint: disable=multiple-imports
 from PIL import Image
@@ -36,13 +36,13 @@ class Degree(tuple):
         '''
         create Degree from decimal degree
         '''
-        if type(degree) is not tuple:
+        if not isinstance(degree, tuple):
             as_float = float(degree)
             return super(Degree, cls).__new__(cls, dms(as_float))
-        else:
-            return super(Degree, cls).__new__(cls, degree)
+        return super(Degree, cls).__new__(cls, degree)
 
     def __init__(self, degree, sign=None):
+        # pylint: disable=unused-argument
         if sign is not None:
             self.sign = sign
         else:
@@ -158,7 +158,7 @@ def get_row(data, row):
     '''
     offset = row * BYTES_PER_ROW
     rowdata = data[offset:offset + BYTES_PER_ROW]
-    logging.debug('rowdata: %r ...' % rowdata[:32])
+    logging.debug('rowdata: %r ...', rowdata[:32])
     return rowdata
 
 def get_column(data, column):
@@ -283,8 +283,7 @@ def get_hgt_file(north, east):
             break
     if matched is None:
         raise(ValueError('No match for %s under %s' % (filebase, DEM_DATA)))
-    else:
-        logging.debug('Showing elevation for %s' % matched)
+    logging.debug('Showing elevation for %s', matched)
     return matched, lat, lon, d_lat, d_lon
 
 def north_offset(north, direction):
@@ -332,6 +331,7 @@ def get_height(north, east):
     >>> get_height(37.0102656, -119.7659941)
     210
     '''
+    # pylint: disable=unused-variable
     filename, lat, lon, d_lat, d_lon = get_hgt_file(north, east)
     logging.debug('d_lat: %d, d_lon: %d', d_lat, d_lon)
     dms_north = Degree(degrees(north))
@@ -347,7 +347,7 @@ def get_height(north, east):
                   repr(dms_north), repr(dms_east), height)
     return height
 
-def dms(degrees, roundto=SAMPLE_SECONDS):
+def dms(_degrees, roundto=SAMPLE_SECONDS):
     '''
     return tuple for degrees-minutes-seconds, given decimal degrees
 
@@ -359,13 +359,13 @@ def dms(degrees, roundto=SAMPLE_SECONDS):
     >>> dms(-20.25)
     (-20, -15, 0)
     '''
-    d = int(degrees)
-    m = int((degrees - d) * 60)
-    s = (degrees - d - (m / 60.0)) * 3600
+    d = int(_degrees)
+    m = int((_degrees - d) * 60)
+    s = (_degrees - d - (m / 60.0)) * 3600
     rounded_s = (int(s) // roundto) * roundto
     return (d, m, rounded_s)
 
-def decimal(dms):
+def decimal(_dms):
     '''
     return decimal degrees, given degrees-minutes-seconds tuple of floats
     >>> decimal((20.0, 15.0, 0.0))
@@ -373,9 +373,9 @@ def decimal(dms):
     >>> decimal((-0.0, -15.0, -0.0))
     -0.25
     '''
-    d = dms[0]
-    m = dms[1] / 60.0
-    s = dms[2] / (60.0 * 60.0)
+    d = _dms[0]
+    m = _dms[1] / 60.0
+    s = _dms[2] / (60.0 * 60.0)
     return d + m + s
 
 def degrees(value):
@@ -384,6 +384,7 @@ def degrees(value):
 
     can be passed in as string from command line, or as dms tuple
     '''
+    # pylint: disable=unused-variable
     try:
         return float(value)
     except TypeError as assuming_tuple:
