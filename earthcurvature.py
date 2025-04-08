@@ -21,7 +21,8 @@ see https://www.metabunk.org
 and https://en.wikipedia.org/wiki/Atmospheric_refraction
 '''
 from __future__ import print_function, division
-import sys, os, math, logging
+# pylint: disable=consider-using-f-string
+import sys, os, math, logging  # pylint: disable=multiple-imports
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.INFO)
 # a radius of 0 (zero) will be used to implement the Flat Earth Society
 # viewpoint, using an azimuthal equidistant disk centered at the North Pole.
@@ -178,8 +179,7 @@ def miles(distance, unit='miles'):
     function = globals().get(conversion, None)
     if function is None or not callable(function):
         raise NotImplementedError('%s not yet implemented' % conversion)
-    else:
-        return function(distance)
+    return function(distance)
 
 def miles_to_miles(distance):
     '''

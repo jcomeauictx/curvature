@@ -1,11 +1,13 @@
 # use Bash and disable builtin rules
 SHELL := /bin/bash
 MAKEFLAGS += --no-builtin-rules
+SCRIPTS := $(wildcard *.py)
+PYLINT := $(SCRIPTS:.py=.pylint)
+DOCTEST := $(SCRIPTS:.py=.doctest)
 # now begins the actual Makefile
 DUMP_SAMPLES ?= 1
 SRTM3 := http://ns004.unternet.net/hgt
 DEM_DATA := /usr/local/share/gis/hgt
-SCRIPTS := $(wildcard *.py)
 ISLA_SAN_JOSE := (-20, 24.164640, -110.312864, 180)
 BUCKEYE := (-118, 37.053, -119.393, 200)
 # estimate camera (eye) height is 5 feet converted to meters
@@ -26,7 +28,7 @@ else
   ADAPTIVE_LIGHTENING SHOW_LOCATION DUMP_SAMPLES DELETE_IMAGE_AFTER_DISPLAY \
   CAMERA_HEIGHT
 endif
-all: panorama
+all: doctests $(PYLINT) panorama
 /tmp/%.hgt.zip:
 	cd /tmp && wget -nc $(SRTM3)/North_America/$*.hgt.zip || \
 	 (dd if=/dev/zero of=$(@:.zip=) bs=2884802 count=1; zip $@ $(@:.zip=))
@@ -47,7 +49,9 @@ showfile: hgtread.py $(REQUIRED:.hgt=.fetch)
 	DUMP_SAMPLES=1 python $< 37.0102656 -119.7659941
 %.doctest: %.py
 	python -m doctest $<
-doctests: $(REQUIRED:.hgt=.fetch) $(SCRIPTS:.py=.doctest)
+%.pylint: %.py
+	pylint $<
+doctests: $(REQUIRED:.hgt=.fetch) $(DOCTEST)
 overview: overview.py
 	python $< 37.0102656 -119.7659941
 segments: 30_mile_segments.ps
