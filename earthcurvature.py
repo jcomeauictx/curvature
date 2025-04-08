@@ -23,6 +23,7 @@ and https://en.wikipedia.org/wiki/Atmospheric_refraction
 from __future__ import print_function, division
 # pylint: disable=consider-using-f-string
 import sys, os, math, logging  # pylint: disable=multiple-imports
+from ast import literal_eval
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.INFO)
 # a radius of 0 (zero) will be used to implement the Flat Earth Society
 # viewpoint, using an azimuthal equidistant disk centered at the North Pole.
@@ -36,19 +37,21 @@ try:
     ER = R = RADIUS = float(os.getenv('EARTH_RADIUS_MILES', 'inf'))
 except (ValueError, TypeError) as failed_parse:
     # evaluate GLOBE or -GLOBE
-    logging.warn('Failed parsing EARTH_RADIUS_MILES as float: %s', failed_parse)
-    ER = R = RADIUS = eval(os.getenv('EARTH_RADIUS_MILES'))
+    logging.warning('Failed parsing EARTH_RADIUS_MILES as float: %s',
+                    failed_parse)
+    ER = R = RADIUS = literal_eval(os.getenv('EARTH_RADIUS_MILES'))
 K = float(os.getenv('COEFFICIENT_OF_REFRACTION') or '0.0')
 if RADIUS > 0 and not math.isinf(RADIUS):
     ER = RADIUS / (1 - K)  # effective radius
 elif K:
-    logging.warn('Coefficient of refraction ignored without positive radius')
+    logging.warning('Coefficient of refraction ignored without positive radius')
     K = 0.0
 CONVEX = math.copysign(1, ER)
 KM = 1.60934  # conversion factor, miles to kilometers, from Google
 UNITS = ['mm', 'cm', 'm', 'km', 'inches', 'feet', 'yards', 'miles']
 
-def earthcurvature(distance=1, unit='miles', dropunit='feet', height=0):
+def earthcurvature(distance=1, unit='miles', dropunit='feet',
+        height=0):  # pylint: disable=unused-argument
     '''
     earthcurvature.com formula, h = r * (1 - cos a)
 
@@ -102,7 +105,8 @@ def dizzib(distance=1, unit='miles', dropunit='feet', height=0):
     format_string = 'distance to horizon: %.08f %s, hidden height: %.08f %s'
     return format_string, (d1, unit, CONVEX * h1, dropunit)
 
-def parabolic(distance=1, unit='miles', dropunit='feet', height=0):
+def parabolic(distance=1, unit='miles', dropunit='feet',
+        height=0):  # pylint: disable=unused-argument
     '''
     simplest formula treats sphere as parabola, works OK for miles < 300;
     it really blows up at around 1000 miles.
@@ -126,8 +130,7 @@ def convert(distance, unit = 'miles'):
         if function is None or not callable(function):
             raise NotImplementedError('%s not yet implemented' % unit)
         return function(distance)
-    else:
-        raise ValueError('given distance unit %s not in %s', unit, UNITS)
+    raise ValueError('given distance unit %s not in %s' % (unit, UNITS))
 
 def km(_miles):
     '''
