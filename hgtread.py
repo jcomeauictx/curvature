@@ -6,9 +6,11 @@ from http://gis.stackexchange.com/a/43756/1291
 
 see also http://www.movable-type.co.uk/scripts/latlong.html
 '''
-import sys, os, struct, glob, logging, math, pprint, tempfile
+# pylint: disable=consider-using-f-string
+import sys, os, struct, glob, logging  # pylint: disable=multiple-imports
+import math, pprint, tempfile  # pylint: disable=multiple-imports
 from PIL import Image
-from earthcurvature import earthcurvature, R, KM, GLOBE
+from earthcurvature import R, KM, GLOBE
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.INFO)
 DEM_DATA = os.getenv('DEM_DATA', '/usr/local/share/gis/hgt')
 SAMPLE_SECONDS = 3  # 3 for SRTM3, 1 for SRTM1
@@ -335,6 +337,7 @@ def get_height(north, east):
     dms_north = Degree(degrees(north))
     dms_east = Degree(degrees(east))
     offset = north_offset(dms_north, d_lat) + east_offset(dms_east, d_lon)
+    # pylint: disable=consider-using-with
     infile = OPEN_FILES.setdefault(filename, open(filename, 'rb'))
     logging.debug('seeking to offset %s', offset)
     infile.seek(offset)
@@ -415,26 +418,27 @@ def getdata(north, east):
     '''
     faster than dump_samples, returns only data in list of rows
     '''
+    # pylint: disable=unused-variable, redeclared-assigned-name
     data, ignored, ignored, d_lat, d_lon = getrawdata(north, east)
     logging.debug('len(data): %d, sample: %r', len(data), data[:10])
     rowdata = chunks(data, chunksize=SAMPLES_PER_ROW)
     logging.debug('data loaded into 2D array')
     return rowdata, north, east, d_lat, d_lon
 
-def flatten(rows):
+def flatten(_rows):
     '''
     convert rows of sample values into flat list
     
     the list comprehension is about two orders of magnitude faster than
-    sum(rows, [])
+    sum(_rows, [])
     '''
-    return [sample for row in rows for sample in row]
+    return [sample for row in _rows for sample in row]
 
 def rows(imagedata):
     '''
     convert imagedata into rows of sample values
     '''
-    return list(chunks(data, chunksize=SAMPLES_PER_ROW))
+    return list(chunks(imagedata, chunksize=SAMPLES_PER_ROW))
 
 def lighten(sample, maxvalue=MAXVALUE):
     '''
@@ -522,7 +526,7 @@ def dump_samples(north, east):
         sample = unpack_sample(data[offset:offset+2])
         datalist.append((lat, lon, sample))
         if os.getenv('DUMP_SAMPLES'):
-            logging.debug('sample: %s' % repr(datalist[-1]))
+            logging.debug('sample: %s', repr(datalist[-1]))
         offset += 2
         lon += d_lon
         if lon[1] == lon[2] == 0 and lon[0] != bumped_lon:
@@ -534,9 +538,8 @@ def read(filename):
     '''
     return binary data from file, closing it properly
     '''
-    infile = open(filename, 'rb')
-    data = infile.read()
-    infile.close()
+    with open(filename, 'rb') as infile:
+        data = infile.read()
     return data
 
 def show(image, prefix='hgt'):
