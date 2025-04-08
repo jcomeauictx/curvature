@@ -129,46 +129,58 @@ def convert(distance, unit = 'miles'):
     else:
         raise ValueError('given distance unit %s not in %s', unit, UNITS)
 
-def km(miles):
-    return miles * KM
+def km(_miles):
+    return _miles * KM
 
 def km_to_miles(amount):
     return amount / KM
 
-def m(miles):
-    return km(miles) * 1000
+def m(_miles):
+    return km(_miles) * 1000
 
 def m_to_miles(amount):
     return km_to_miles(amount / 1000)
 
-def cm(miles):
-    return km(miles) * 100000
+def cm(_miles):
+    return km(_miles) * 100000
 
 def cm_to_miles(amount):
     return km_to_miles(amount / 100000)
 
-def mm(miles):
-    return km(miles) * 1000000
+def mm(_miles):
+    return km(_miles) * 1000000
 
 def mm_to_miles(amount):
     return km_to_miles(amount / 1000000)
 
-def yards(miles):
-    return feet(miles) / 3
+def yards(_miles):
+    return feet(_miles) / 3
 
 def yards_to_miles(amount):
     return feet_to_miles(amount * 3)
 
-def feet(miles):
-    return miles * 5280
+def feet(_miles):
+    '''
+    convert miles to feet
+    '''
+    return _miles * 5280
 
 def feet_to_miles(amount):
+    '''
+    convert feet to miles
+    '''
     return amount / 5280
 
-def inches(miles):
-    return feet(miles) * 12
+def inches(_miles):
+    '''
+    convert miles to inches
+    '''
+    return feet(_miles) * 12
 
 def inches_to_miles(amount):
+    '''
+    convert inches to miles
+    '''
     return feet_to_miles(amount / 12)
 
 def miles(distance, unit='miles'):
@@ -198,3 +210,4 @@ if __name__ == '__main__':
     ARGS[len(ARGS):] = DEFAULTS[len(ARGS):]
     FORMAT_STRING, RESULTS = FUNCTION(*ARGS)
     print(FORMAT_STRING % RESULTS)
+# vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
