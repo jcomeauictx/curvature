@@ -401,6 +401,7 @@ def getrawdata(north, east):
     '''
     returns data in flat, one-dimensional list
     '''
+    # pylint: disable=unused-variable
     filename, latitude, longitude, d_lat, d_lon = get_hgt_file(north, east)
     databytes = read(filename)
     rawdata = [unpack_sample(sample) for sample in chunks(databytes)]
@@ -410,6 +411,7 @@ def histogram(ignored, north, east, *alsoignored):
     '''
     return elevation values and counts of quadrant
     '''
+    # pylint: disable=unused-variable, unused-argument
     rawdata, north, east, d_lat, d_lon = getrawdata(north, east)
     values = sorted(set(rawdata))
     return {value: rawdata.count(value) for value in values}
