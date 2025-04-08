@@ -6,10 +6,10 @@ various views can be generated based on flat-earth, concave-earth, and
 convex-earth views.
 '''
 import sys, os, math  # pylint: disable=multiple-imports
+from PIL import Image
 from hgtread import logging, get_height
 from hgtread import RADIUS, SAMPLE_SECONDS
 from earthcurvature import R, earthcurvature
-from PIL import Image
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.INFO)
 SPAN = float(os.getenv('SPAN', '60.0'))
 logging.info('SPAN: %.02f', SPAN)
@@ -258,7 +258,8 @@ def cartesian(bearing):
 
 compass = cartesian  # reverse holds true
 
-def latitude_extremes(latitude, longitude, bearing, distance, span):
+def latitude_extremes(latitude, longitude,
+        bearing, distance, span):  # pylint: disable=unused-argument
     '''
     find the minimum and maximum latitude in the area covered
 
@@ -274,8 +275,7 @@ def latitude_extremes(latitude, longitude, bearing, distance, span):
     if math.copysign(1, most_polar) != math.copysign(1, most_equatorial):
         # span crosses equator
         return (0, most_polar)
-    else:
-        return(most_equatorial, most_polar)
+    return(most_equatorial, most_polar)
 
 def spherical_move(latitude, longitude, bearing, distance,
         compass_bearing=True):
@@ -402,6 +402,7 @@ def azimuthal_equidistant_move(latitude, longitude, bearing, distance,
     >>> azimuthal_equidistant_move(60.0, 180.0, -90, DEGREE_IN_METERS)
     (59.98333796039273, -178.0908475670036)
     '''
+    # pylint: disable=unused-variable
     logging.debug('move: %s, %s, %s, %s, %s', latitude, longitude,
                   bearing, distance, compass_bearing)
     radians = relative_bearing(bearing, longitude, compass_bearing)
@@ -444,3 +445,4 @@ if __name__ == '__main__':
     else:
         import doctest
         doctest.testmod()
+# vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
