@@ -7,7 +7,8 @@ exploration of these viewpoints so that the inquistive mind can test which
 one holds up best to objective reality.
 
 My eventual goal is to develop a site similar to Ulrich Deuschle's
-[panorama generator](http://www.udeuschle.selfhost.pro/panoramas/makepanoramas_en.htm)
+[panorama generator](http://www.udeuschle.selfhost.pro/panoramas/makepanoramas_en.htm), [peakfinder](https://peakfinder.com/), or
+[viewfinderpanoramas](https://viewfinderpanoramas.org/panoramas.html),
 but having choice of output to match more than one of these 3 "theories".
 That should give the most convincing proof of one "viewpoint" over the other,
 since what one sees from a mountaintop should be distinctly different between
