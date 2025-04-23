@@ -6,7 +6,7 @@ PYLINT := $(SCRIPTS:.py=.pylint)
 DOCTEST := $(SCRIPTS:.py=.doctest)
 # now begins the actual Makefile
 DUMP_SAMPLES ?= 1
-SRTM3 := http://ns004.unternet.net/hgt
+SRTM3 := https://gnixl.com/srtm/srtm3
 DEM_DATA := /usr/local/share/gis/hgt
 ISLA_SAN_JOSE := (-20, 24.164640, -110.312864, 180)
 BUCKEYE := (-118, 37.053, -119.393, 200)
@@ -18,6 +18,7 @@ COEFFICIENT_OF_REFRACTION ?= .25
 SPAN ?= 60.0
 OPT ?= -OO
 OCEANFRONT ?= True
+WGET ?= wget --no-check-certificate --no-clobber
 REQUIRED := N24W111.hgt  N25W112.hgt  N36W115.hgt  N37W115.hgt \
  N43W120.hgt N24W112.hgt  N26W111.hgt  N36W116.hgt  N37W120.hgt N25W111.hgt \
  N26W112.hgt  N36W117.hgt  N39W119.hgt
@@ -29,11 +30,10 @@ else
   CAMERA_HEIGHT
 endif
 all: doctests $(PYLINT) panorama
-/tmp/%.hgt.zip:
-	cd /tmp && wget -nc $(SRTM3)/North_America/$*.hgt.zip || \
-	 (dd if=/dev/zero of=$(@:.zip=) bs=2884802 count=1; zip $@ $(@:.zip=))
-/tmp/%.hgt: /tmp/%.hgt.zip
-	cd /tmp && unzip -u $<
+/tmp/%.hgt:
+	cd /tmp && filename=$* && prefix=$${filename:0:3} && \
+	 $(WGET) $(SRTM3)/$$prefix/$*.hgt || \
+	 dd if=/dev/zero of=$@ bs=2884802 count=1
 $(DEM_DATA):
 	sudo mkdir -p $@
 	sudo chown -R $(USER):$(USER) $@
